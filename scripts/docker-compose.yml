@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  conversion_dev:
+    image: golang_env_from_guardian:v1
+    volumes:
+      - ../:/go/src/github.com/curtank/go-explicit-type-conversion
+      - .:/trp
+    working_dir: /go/src/
+    network_mode: "host"
+    command: "sh /trp/loop.sh"
+    expose:
+      - "5000"

@@ -1,0 +1,1 @@
+docker run --rm -p 27027-27029:27017-27019 --name mongodbunstable mongo
