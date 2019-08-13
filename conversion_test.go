@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/smartystreets/goconvey/convey"
+
 	"github.com/golang/protobuf/ptypes"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 )
@@ -236,17 +238,135 @@ type GRPCTimeStamp struct {
 	T *timestamp.Timestamp
 }
 
-func timetotimstamp(t time.Time) *timestamp.Timestamp {
-	c, _ := ptypes.TimestampProto(t)
-	return c
+func timetotimstamp(t time.Time) (*timestamp.Timestamp, error) {
+	c, err := ptypes.TimestampProto(t)
+	return c, err
 }
 func TestConvertTime(t *testing.T) {
 	from := GoTimeStamp{T: time.Now()}
 	to := GRPCTimeStamp{}
+	Convey("Convert time", t, func() {
+		c := NewClient()
+		err := c.Addfunc(timetotimstamp)
+		So(err, ShouldBeNil)
+		err = c.Convert(&from, &to)
+		So(err, ShouldBeNil)
+		t.Log(to)
+	})
+
+}
+func TestConvertPaste(t *testing.T) {
+	type OA struct {
+		Name string
+		ID   string
+	}
+	type OB struct {
+		Name int
+		ID   string
+	}
+	oa := OA{Name: "bob", ID: "2212"}
+	ob := OB{}
 	c := NewClient()
-	c.Addfunc(timetotimstamp)
-	c.Convert(&from, &to)
-	t.Log(to)
+	c.Addfunc(s2i)
+	c.Convert(&oa, &ob)
+	t.Log(ob)
+
+	t.Error("todo")
+}
+func TestPointerBehaivor(t *testing.T) {
+	type NameStr struct {
+		Name string
+	}
+	type OA struct {
+		Name NameStr
+		ID   string
+	}
+	type OB struct {
+		Name NameStr
+		ID   string
+	}
+	n := NameStr{Name: "sss"}
+	oa := OA{Name: n, ID: "2212"}
+	ob := OB{}
+	c := NewClient()
+	c.Addfunc(s2i)
+	c.Convert(&oa, &ob)
+	t.Log(ob)
+	t.Error("todo")
+}
+func TestPointerBehaivor2(t *testing.T) {
+	type NameStr struct {
+		Name string
+	}
+	type OA struct {
+		Name *NameStr
+		ID   string
+	}
+	type OB struct {
+		Name *NameStr
+		ID   string
+	}
+	Convey("pointer paste", t, func() {
+		n := NameStr{Name: "sss"}
+		oa := OA{Name: &n, ID: "2212"}
+		ob := OB{}
+		c := NewClient()
+		c.Addfunc(s2i)
+		r := c.Convert(&oa, &ob)
+		So(r, ShouldBeNil)
+		So(ob.Name.Name, ShouldEqual, "sss")
+		n.Name = "qqq"
+		So(ob.Name.Name, ShouldEqual, "qqq")
+	})
+
+}
+func TestPointerBehaivor3(t *testing.T) {
+	type NameStr struct {
+		Name string
+	}
+	type OA struct {
+		Name *NameStr
+		ID   string
+	}
+	type OB struct {
+		Name string
+		ID   string
+	}
+	f := func(n *NameStr) string {
+		return n.Name
+	}
+	n := NameStr{Name: "sss"}
+	oa := OA{Name: &n, ID: "2212"}
+	ob := OB{}
+	c := NewClient()
+	c.Addfunc(f)
+	c.Convert(&oa, &ob)
+	t.Log(ob)
+	t.Error("todo")
+}
+func TestPointerBehaivor4(t *testing.T) {
+	type NameStr struct {
+		Name string
+	}
+	type OA struct {
+		Name *NameStr
+		ID   string
+	}
+	type OB struct {
+		Name string
+		ID   string
+	}
+	f := func(n NameStr) string {
+		return n.Name
+	}
+	n := NameStr{Name: "sss"}
+	oa := OA{Name: &n, ID: "2212"}
+	ob := OB{}
+	c := NewClient()
+	c.Addfunc(f)
+	err := c.Convert(&oa, &ob)
+	t.Log(err)
+	t.Log(ob)
 	t.Error("todo")
 }
 func TestNotStruct(t *testing.T) {

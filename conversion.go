@@ -2,16 +2,19 @@ package conversion
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"reflect"
 )
 
 var (
 	ErrNotFunc          = errors.New("not a func")
+	ErrCallConvertFunc  = errors.New("call convert func with error return and but can not assert to error type")
 	ErrNotStruct        = errors.New("convert type is not a struct")
 	ErrFuncAlreadyExist = errors.New("adding func alreadyexist")
 	ErrFuncNotExist     = errors.New("can not find func")
 	ErrFuncInNotOne     = errors.New("func input len is not 1")
-	ErrFuncOutNotOne    = errors.New("func output len is not 1")
+	ErrFuncOutNotTwo    = errors.New("func output len is not 2")
 )
 
 //Client Conversion Client
@@ -45,6 +48,9 @@ func (c *Client) Convert(from interface{}, to interface{}) error {
 			if out.IsValid() {
 				iop, err := c.ConvertField(in, out)
 				if err != nil {
+					if err == ErrFuncNotExist {
+						continue
+					}
 					return err
 				}
 				out.Set(iop)
@@ -80,8 +86,8 @@ func (c *Client) Addfunc(o interface{}) error {
 	if functype.NumIn() != 1 {
 		return ErrFuncInNotOne
 	}
-	if functype.NumOut() != 1 {
-		return ErrFuncOutNotOne
+	if functype.NumOut() != 2 {
+		return ErrFuncOutNotTwo
 	}
 	in := functype.In(0)
 	out := functype.Out(0)
@@ -94,13 +100,22 @@ func (c *Client) Addfunc(o interface{}) error {
 	return nil
 }
 func (c *Client) ConvertField(in, out reflect.Value) (reflect.Value, error) {
+	if in.Type() == out.Type() {
+		return in, nil
+	}
 	pair := inOutPair{In: in.Type(), Out: out.Type()}
 	f, ok := c.transMap[pair]
 	if !ok {
-		return reflect.Value{}, ErrNotFunc
+		return reflect.Value{}, ErrFuncNotExist
 	}
 	nin := make([]reflect.Value, 1)
 	nin[0] = in
-	res := f.Call(nin)[0]
-	return res, nil
+	res := f.Call(nin)
+	fmt.Fprintln(os.Stderr, "hello")
+	err, e := res[1].Interface().(error)
+	fmt.Fprintln(os.Stderr, err, "ppp")
+	if !e {
+		return res[0], ErrCallConvertFunc
+	}
+	return res[0], err
 }
