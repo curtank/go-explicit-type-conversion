@@ -43,10 +43,13 @@ func (c *Client) Convert(from interface{}, to interface{}) error {
 	for i := 0; i < fromv.NumField(); i++ {
 		in := fromv.Field(i)
 		correspondingField, ok := c.findCorrespondingField(fromv.Type().Field(i), &tov)
+		fmt.Fprintln(os.Stderr, correspondingField)
 		if ok {
 			out := tov.FieldByName(correspondingField.Name)
 			if out.IsValid() {
 				iop, err := c.ConvertField(in, out)
+				fmt.Fprintln(os.Stderr, iop, err)
+
 				if err != nil {
 					if err == ErrFuncNotExist {
 						continue
@@ -72,6 +75,7 @@ func (c *Client) findFunc(in, out reflect.Type) reflect.Value {
 	pp := inOutPair{In: in, Out: out}
 	return c.transMap[pp]
 }
+
 func (c *Client) call(para reflect.Value, iop inOutPair) reflect.Value {
 	nin := make([]reflect.Value, 1)
 	nin[0] = reflect.ValueOf(para.Interface())
@@ -104,6 +108,8 @@ func (c *Client) ConvertField(in, out reflect.Value) (reflect.Value, error) {
 		return in, nil
 	}
 	pair := inOutPair{In: in.Type(), Out: out.Type()}
+	fmt.Fprintln(os.Stderr, pair)
+
 	f, ok := c.transMap[pair]
 	if !ok {
 		return reflect.Value{}, ErrFuncNotExist
@@ -111,11 +117,13 @@ func (c *Client) ConvertField(in, out reflect.Value) (reflect.Value, error) {
 	nin := make([]reflect.Value, 1)
 	nin[0] = in
 	res := f.Call(nin)
-	fmt.Fprintln(os.Stderr, "hello")
+	fmt.Fprintln(os.Stderr, res)
+
+	fmt.Fprintln(os.Stderr, "hello", res[1].Interface())
 	err, e := res[1].Interface().(error)
-	fmt.Fprintln(os.Stderr, err, "ppp")
-	if !e {
-		return res[0], ErrCallConvertFunc
+	fmt.Fprintln(os.Stderr, err, e)
+	if e {
+		return res[0], err
 	}
 	return res[0], err
 }

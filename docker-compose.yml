@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  conversion_dev:
+    image: golang_env_from_getc:v1
+    volumes:
+      - .:/go/src/github.com/curtank/go-explicit-type-conversion
+      - ./loop.sh:/trp/loop.sh
+    working_dir: /go/src/
+    network_mode: "host"
+    command: "sh /trp/loop.sh"

@@ -1,0 +1,1 @@
+docker commit go-explicit-type-conversion_conversion_dev_1  golang_env_from_getc:v1

@@ -58,6 +58,7 @@ func Init(
 		log.Ldate|log.Ltime|log.Lshortfile)
 }
 func TestConversion(t *testing.T) {
+
 	ns := NameS{N: "qqq"}
 	a := A{Name: &ns}
 	b := B(a)
@@ -356,15 +357,20 @@ func TestPointerBehaivor4(t *testing.T) {
 		Name string
 		ID   string
 	}
-	f := func(n NameStr) string {
-		return n.Name
+	f := func(n *NameStr) (string, error) {
+		return n.Name, nil
 	}
+	// f2 := func(n *NameStr) (string, error) {
+	// 	return n.Name, errors.New("convert  failed")
+	// }
 	n := NameStr{Name: "sss"}
 	oa := OA{Name: &n, ID: "2212"}
 	ob := OB{}
 	c := NewClient()
-	c.Addfunc(f)
-	err := c.Convert(&oa, &ob)
+	err := c.Addfunc(f)
+	t.Log(err)
+	t.Log(c.transMap)
+	err = c.Convert(&oa, &ob)
 	t.Log(err)
 	t.Log(ob)
 	t.Error("todo")
