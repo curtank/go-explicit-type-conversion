@@ -10,9 +10,11 @@ import (
 )
 
 type UserInfo struct {
-	Name         string
-	Friends      []UserBrief
-	RegisterTime *timestamp.Timestamp
+	Name          string
+	Friends       []UserBrief
+	Follower      []UserBrief
+	RegisterTime  *timestamp.Timestamp
+	LastLoginTime *timestamp.Timestamp
 }
 
 type UserBrief struct {
@@ -20,10 +22,12 @@ type UserBrief struct {
 	Phone string
 }
 type User struct {
-	ID           string
-	Name         string
-	Friends      []string
-	RegisterTime time.Time
+	ID            string
+	Name          string
+	Friends       []string
+	Follower      []string
+	RegisterTime  time.Time
+	LastLoginTime time.Time
 }
 
 func timetotimstamp(t time.Time) (*timestamp.Timestamp, error) {
@@ -46,10 +50,12 @@ func main() {
 	c.AddFunc(timetotimstamp)
 	c.AddFunc(UserIDs2Briefs)
 	user := User{
-		ID:           "skIDsq",
-		Name:         "Bill",
-		Friends:      []string{"qqrrpp", "ssaaaee"},
-		RegisterTime: time.Now(),
+		ID:            "skIDsq",
+		Name:          "Bill",
+		Friends:       []string{"qqrrpp", "ssaaaee"},
+		Follower:      []string{"sdkjfsk", "sdkf"},
+		RegisterTime:  time.Now(),
+		LastLoginTime: time.Now(),
 	}
 	userinfo := UserInfo{}
 
