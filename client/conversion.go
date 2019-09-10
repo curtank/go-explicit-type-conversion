@@ -1,9 +1,7 @@
-package conversion
+package client
 
 import (
 	"errors"
-	"fmt"
-	"os"
 	"reflect"
 )
 
@@ -43,12 +41,12 @@ func (c *Client) Convert(from interface{}, to interface{}) error {
 	for i := 0; i < fromv.NumField(); i++ {
 		in := fromv.Field(i)
 		correspondingField, ok := c.findCorrespondingField(fromv.Type().Field(i), &tov)
-		fmt.Fprintln(os.Stderr, correspondingField)
+		// fmt.Fprintln(os.Stderr, correspondingField)
 		if ok {
 			out := tov.FieldByName(correspondingField.Name)
 			if out.IsValid() {
 				iop, err := c.ConvertField(in, out)
-				fmt.Fprintln(os.Stderr, iop, err)
+				// fmt.Fprintln(os.Stderr, iop, err)
 
 				if err != nil {
 					if err == ErrFuncNotExist {
@@ -81,7 +79,7 @@ func (c *Client) call(para reflect.Value, iop inOutPair) reflect.Value {
 	nin[0] = reflect.ValueOf(para.Interface())
 	return c.transMap[iop].Call(nin)[0]
 }
-func (c *Client) Addfunc(o interface{}) error {
+func (c *Client) AddFunc(o interface{}) error {
 	finterface := reflect.ValueOf(o)
 	if finterface.Kind() != reflect.Func {
 		return ErrNotFunc
@@ -104,24 +102,24 @@ func (c *Client) Addfunc(o interface{}) error {
 	return nil
 }
 func (c *Client) ConvertField(in, out reflect.Value) (reflect.Value, error) {
-	if in.Type() == out.Type() {
-		return in, nil
-	}
+
 	pair := inOutPair{In: in.Type(), Out: out.Type()}
-	fmt.Fprintln(os.Stderr, pair)
+	// fmt.Fprintln(os.Stderr, pair)
 
 	f, ok := c.transMap[pair]
 	if !ok {
+		if in.Type() == out.Type() {
+			return in, nil
+		}
 		return reflect.Value{}, ErrFuncNotExist
 	}
 	nin := make([]reflect.Value, 1)
 	nin[0] = in
 	res := f.Call(nin)
-	fmt.Fprintln(os.Stderr, res)
+	// fmt.Fprintln(os.Stderr, res)
 
-	fmt.Fprintln(os.Stderr, "hello", res[1].Interface())
 	err, e := res[1].Interface().(error)
-	fmt.Fprintln(os.Stderr, err, e)
+	// fmt.Fprintln(os.Stderr, err, e)
 	if e {
 		return res[0], err
 	}
