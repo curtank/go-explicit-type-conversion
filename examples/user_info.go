@@ -30,6 +30,12 @@ type User struct {
 	LastLoginTime time.Time
 }
 
+var storage = map[string]string{
+	"1": "Sir Humphrey Appleby",
+	"2": "Bernard Woolley",
+	"3": "Jim Hacker",
+}
+
 func timetotimstamp(t time.Time) (*timestamp.Timestamp, error) {
 	return ptypes.TimestampProto(t)
 }
@@ -42,7 +48,7 @@ func UserIDs2Briefs(IDs []string) ([]UserBrief, error) {
 }
 func queryUser(ID string) UserBrief {
 	return UserBrief{
-		Name: "Bob",
+		Name: storage[ID],
 	}
 }
 func main() {
@@ -50,10 +56,10 @@ func main() {
 	c.AddFunc(timetotimstamp)
 	c.AddFunc(UserIDs2Briefs)
 	user := User{
-		ID:            "skIDsq",
-		Name:          "Bill",
-		Friends:       []string{"qqrrpp", "ssaaaee"},
-		Follower:      []string{"sdkjfsk", "sdkf"},
+		ID:            "1",
+		Name:          "Sir Humphrey Appleby",
+		Friends:       []string{"2", "3"},
+		Follower:      []string{"2"},
 		RegisterTime:  time.Now(),
 		LastLoginTime: time.Now(),
 	}
