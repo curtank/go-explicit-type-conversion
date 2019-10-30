@@ -122,9 +122,7 @@ func (c *Client) StaticGenerate(from interface{}, to interface{}, inName, outNam
 	for i := 0; i < fromv.NumField(); i++ {
 		in := fromv.Field(i)
 		correspondingField, ok := c.findCorrespondingField(fromv.Type().Field(i), &tov)
-		// fmt.Fprintln(os.Stderr, correspondingField)
-		// fmt.Fprintln(os.Stderr, fromv.Type().Field(i).Type)
-		// fmt.Fprintln(os.Stderr, correspondingField.Type)
+
 
 		if ok {
 			out := tov.FieldByName(correspondingField.Name)
