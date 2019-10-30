@@ -138,7 +138,12 @@ func TestTime(t *testing.T) {
 		t.Error("fail convert", gotime, grpctime)
 	}
 }
-
+func TestRemoveMain(t *testing.T){
+	s:="main.test"
+	r:=removeMain(s)
+	t.Log(r)
+	t.Error("todo")
+}
 // func TestConvertFiled(t *testing.T) {
 // 	type Bob struct {
 // 		Name string

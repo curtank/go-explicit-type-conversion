@@ -54,57 +54,13 @@ func queryUser(ID string) UserBrief {
 		Name: storage[ID],
 	}
 }
-func f(user User) (UserInfo,error){
-        userinfo:=UserInfo{
-                Name:user.Name,
-                LastName:user.LastName,
-
-        }
-
-        Friends,err:=UserIDs2Briefs(user.Friends)
-        if err !=nil{
-                return  userinfo,err
-        }
-        userinfo.Friends=Friends
-
-        Follower,err:=UserIDs2Briefs(user.Follower)
-        if err !=nil{
-                return  userinfo,err
-        }
-        userinfo.Follower=Follower
-
-        RegisterTime,err:=ptypes.TimestampProto(user.RegisterTime)
-        if err !=nil{
-                return  userinfo,err
-        }
-        userinfo.RegisterTime=RegisterTime
-
-        LastLoginTime,err:=ptypes.TimestampProto(user.LastLoginTime)
-        if err !=nil{
-                return  userinfo,err
-        }
-        userinfo.LastLoginTime=LastLoginTime
-
-        return userinfo,nil
-}
 func main() {
 	c := client.NewClient()
 	// c.AddFunc(timetotimstamp)
 	c.AddFunc(ptypes.TimestampProto)
 	c.AddFunc(UserIDs2Briefs)
-	user := User{
-		// ID:            "1",
-		// Name:          "Sir Humphrey Appleby",
-		// LastName: "Appleby",
-		// Friends:       []string{"2", "3"},
-		// Follower:      []string{"2"},
-		// RegisterTime:  time.Now(),
-		// LastLoginTime: time.Now(),
-	}
+	user := User{}
 	userinfo := UserInfo{}
-
-	c.Convert(&user, &userinfo)
-	fmt.Println(userinfo)
 	code,_:=c.StaticGenerate(&user, &userinfo,"user","userinfo")
 	fmt.Println(code)
 }
